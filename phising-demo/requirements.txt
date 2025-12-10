@@ -1,0 +1,13 @@
+numpy==1.26.4
+pandas==2.2.2
+matplotlib==3.7.5
+seaborn==0.12.2
+scikit-learn==1.2.2
+joblib==1.4.2
+flask
+requests
+beautifulsoup4
+tldextract
+python-whois
+dnspython
+ipaddress

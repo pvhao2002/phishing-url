@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Phishing URL Detection Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div class="logo-circle">🛡️</div>
+            <div>
+                <h1>Phishing URL Detection</h1>
+                <p class="subtitle">Kiểm tra nhanh mức độ an toàn của đường dẫn URL</p>
+            </div>
+        </header>
+
+        <main class="card">
+            <form method="POST" class="url-form">
+                <label for="url" class="form-label">Nhập URL cần kiểm tra</label>
+
+                <div class="input-group">
+                    <span class="prefix">https://</span>
+                    <input type="text" id="url" name="url" placeholder="vd: example.com/login"
+                        value="{{ url_input or '' }}" required>
+                </div>
+
+                <!-- ✅ CHỌN MODEL -->
+                <div class="model-select">
+                    <label>
+                        <input type="radio" name="model" value="logistic" {% if selected_model=="logistic" %}checked{%
+                            endif %}>
+                        Logistic Regression
+                    </label>
+
+                    <label style="margin-left:20px;">
+                        <input type="radio" name="model" value="forest" {% if selected_model=="forest" %}checked{% endif
+                            %}>
+                        Random Forest
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary">Kiểm tra URL</button>
+            </form>
+
+
+            {% if prediction %}
+            <section class="result-section">
+                <h2>Kết quả phân tích</h2>
+
+                <div class="result-card {% if 'Phishing' in prediction %}danger{% else %}safe{% endif %}">
+                    <div class="status">
+                        {% if 'Phishing' in prediction %}
+                        <span class="status-icon">⚠️</span>
+                        <span class="status-text">URL có dấu hiệu lừa đảo</span>
+                        {% else %}
+                        <span class="status-icon">✅</span>
+                        <span class="status-text">URL có vẻ an toàn</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="result-detail">
+                        <p><strong>Phân loại:</strong> {{ prediction }}</p>
+                        {% if probability is not none %}
+                        <p>
+                            <strong>Xác suất:</strong>
+                            {{ '%.2f'|format(probability * 100) }}%
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+        </main>
+
+        <footer class="app-footer">
+            <p> 1. Huỳnh Quỳnh Đức </p> <br>
+            <p>2. Mai Thái Đăng</p>
+        </footer>
+    </div>
+</body>
+
+</html>
