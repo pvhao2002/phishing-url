@@ -1,10 +1,10 @@
-✅ SAU KHI CÀI XONG → BẮT BUỘC LÀM 3 LỆNH NÀY
-python3 -m pip install --upgrade pip
-python3 -m pip install virtualenv
+# ✅ SAU KHI CÀI XONG → BẮT BUỘC LÀM 3 LỆNH NÀY
+# python3 -m pip install --upgrade pip
+# python3 -m pip install virtualenv
 
-✅ TẠO MÔI TRƯỜNG ẢO CHO PROJECT ML (RẤT QUAN TRỌNG)
-python3 -m venv venv
-source venv/bin/activate
+# ✅ TẠO MÔI TRƯỜNG ẢO CHO PROJECT ML (RẤT QUAN TRỌNG)
+# python3 -m venv venv
+# source venv/bin/activate
 
 
 # python version: 3.10.14
