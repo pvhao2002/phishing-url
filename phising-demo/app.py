@@ -76,9 +76,7 @@ def get_domain_reg_len(domain):
 
 def ml_predict(url, model_type="forest"):
     features = extract_features(url)
-    print(features)
     X = np.array([[features[f] for f in FEATURE_ORDER]])
-    print(X)
 
     model = model_log if model_type == "logistic" else model_forest
 
@@ -151,11 +149,11 @@ def extract_features(url):
     # ========== 7. SubDomains ==========
     dots = domain.count(".")
     if dots <= 1:
-        features["SubDomains"] = 1
+        features["SubDomains"] = -1
     elif dots == 2:
         features["SubDomains"] = 0
     else:
-        features["SubDomains"] = -1
+        features["SubDomains"] = 1
     features["HTTPS"] = -1 if parsed.scheme == "https" else 1
     features["DomainRegLen"] = get_domain_reg_len(domain)
     features["NonStdPort"] = 1 if parsed.port not in [80, 443] else -1
