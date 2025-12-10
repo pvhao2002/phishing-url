@@ -46,7 +46,7 @@ def check_domain_age(domain):
 
         age_days = (today - creation).days
 
-        return -1 if age_days >= 180 else 1   # >= 6 tháng → legit
+        return -1 if age_days >= 180 else 1   
 
     except:
         return 1
@@ -111,8 +111,6 @@ import ipaddress
 
 def extract_features(url):
     url = normalize_url(url)
-
-    # ✅ Khởi tạo đúng chuẩn {-1, 0, 1}
     features = {
         'UsingIP': 1, 'LongURL':1, 'ShortURL': 1, 'Symbol@': 1,
         'Redirecting//': 1, 'PrefixSuffix-': 1, 'SubDomains': 1,
@@ -137,8 +135,6 @@ def extract_features(url):
         features["UsingIP"] = 1
     except:
         features["UsingIP"] = -1
-
-    # ========== 2. LongURL ==========
     if len(url) < 54:
         features["LongURL"] = -1
     elif 54 <= len(url) <= 75:
@@ -146,17 +142,10 @@ def extract_features(url):
     else:
         features["LongURL"] = 1
 
-    # ========== 3. ShortURL ==========
     shorteners = ["bit.ly", "tinyurl.com", "goo.gl", "t.co"]
     features["ShortURL"] = 1 if any(x in url for x in shorteners) else -1
-
-    # ========== 4. Symbol@ ==========
     features["Symbol@"] = 1 if "@" in url else -1
-
-    # ========== 5. Redirecting// ==========
     features["Redirecting//"] = 1 if url.rfind("//") > 6 else -1
-
-    # ========== 6. PrefixSuffix- ==========
     features["PrefixSuffix-"] = 1 if "-" in domain else -1
 
     # ========== 7. SubDomains ==========
@@ -167,66 +156,38 @@ def extract_features(url):
         features["SubDomains"] = 0
     else:
         features["SubDomains"] = -1
-
-    # ========== 8. HTTPS ==========
     features["HTTPS"] = -1 if parsed.scheme == "https" else 1
-
-    # ========== 9. DomainRegLen ==========
     features["DomainRegLen"] = get_domain_reg_len(domain)
-
-    # ========== 10. NonStdPort ==========
     features["NonStdPort"] = 1 if parsed.port not in [80, 443] else -1
-
-    # ========== 11. HTTPSDomainURL ==========
     features["HTTPSDomainURL"] = -1 if "https" in domain else 1
-
-    # ========== 12–23. HTML Features ==========
     try:
         r = requests.get(url, timeout=7)
         soup = BeautifulSoup(r.text, "html.parser")
-
-        # Favicon
         favicon = soup.find("link", rel=re.compile("icon", re.I))
         if favicon and favicon.get("href"):
             features["Favicon"] = 1 if domain not in favicon.get("href") else -1
-
-        # RequestURL
         imgs = soup.find_all("img", src=True)
         ext = [i for i in imgs if domain not in i["src"]]
         ratio = len(ext) / max(1, len(imgs))
         features["RequestURL"] = 1 if ratio > 0.5 else 0 if ratio > 0.2 else -1
-
-        # AnchorURL
         links = soup.find_all("a", href=True)
         unsafe = [a for a in links if domain not in a["href"]]
         ratio = len(unsafe) / max(1, len(links))
         features["AnchorURL"] = 1 if ratio > 0.5 else 0 if ratio > 0.2 else -1
-
-        # Script
         scripts = soup.find_all("script", src=True)
         ext_scripts = [s for s in scripts if domain not in s["src"]]
         features["LinksInScriptTags"] = 1 if ext_scripts else -1
-
-        # Form
         forms = soup.find_all("form", action=True)
         abnormal = [f for f in forms if domain not in f["action"]]
         features["ServerFormHandler"] = 1 if abnormal else -1
-
-        # InfoEmail
         features["InfoEmail"] = 1 if "mailto:" in r.text.lower() else -1
-
-        # AbnormalURL
         features["AbnormalURL"] = 1 if domain not in url else -1
-
-        # WebsiteForwarding
         if len(r.history) == 0:
             features["WebsiteForwarding"] = -1
         elif len(r.history) == 1:
             features["WebsiteForwarding"] = 0
         else:
             features["WebsiteForwarding"] = 1
-
-        # JS Behaviors
         features["StatusBarCust"] = 1 if "onmouseover" in r.text.lower() else -1
         features["DisableRightClick"] = 1 if "event.button==2" in r.text.lower() else -1
         features["UsingPopupWindow"] = 1 if "window.open" in r.text.lower() else -1
@@ -236,12 +197,7 @@ def extract_features(url):
         features['GoogleIndex'] = 1
         features['LinksPointingToPage'] = 1
         features['StatsReport'] = 1
-        
-
-    # ========== 24. AgeOfDomain ==========
     features["AgeOfDomain"] = check_domain_age(domain)
-
-    # ========== 25. DNSRecording ==========
     try:
         dns.resolver.resolve(domain, "A")
         features["DNSRecording"] = -1
