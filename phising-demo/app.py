@@ -19,6 +19,7 @@ import ipaddress
 app = Flask(__name__)
 model_log = joblib.load("./static/logistic_url_model.pkl")
 model_forest = joblib.load("./static/forest_url_model.pkl")
+model_svm = joblib.load('./static/svm.pkl')
 FEATURE_ORDER = [
  'UsingIP','LongURL','ShortURL','Symbol@','Redirecting//','PrefixSuffix-',
  'SubDomains','HTTPS','DomainRegLen','Favicon','NonStdPort','HTTPSDomainURL',
@@ -78,7 +79,7 @@ def ml_predict(url, model_type="forest"):
     features = extract_features(url)
     X = np.array([[features[f] for f in FEATURE_ORDER]])
 
-    model = model_log if model_type == "logistic" else model_forest
+    model = model_log if model_type == "logistic"  else model_forest if model_type == "forest" else model_svm
 
     probs = model.predict_proba(X)[0]
     classes = model.classes_
@@ -212,19 +213,62 @@ def index():
     url_input = ""
     selected_model = "forest"
 
+    selected_mode = request.form.get("mode", "url")
+    feature_values = {}
+
     if request.method == "POST":
-        url_input = request.form.get("url", "").strip()
         selected_model = request.form.get("model", "forest")
 
-        if url_input:
-            prediction, probability = ml_predict(url_input, selected_model)
+        if selected_mode == "url":
+
+            url_input = request.form.get("url", "").strip()
+            if url_input:
+                prediction, probability = ml_predict(url_input, selected_model)
+
+   
+        elif selected_mode == "manual":
+            for field in FEATURE_ORDER:
+                raw_value = request.form.get(f"f_{field}", None)
+
+                if raw_value is None:
+                    feature_values[field] = 0
+                else:
+                    try:
+                        feature_values[field] = int(float(raw_value))
+                    except:
+                        feature_values[field] = 0
+
+            X = np.array([[feature_values[f] for f in FEATURE_ORDER]])
+
+            if selected_model == "logistic":
+                model = model_log
+            elif selected_model == "forest":
+                model = model_forest
+            else:
+                model = model_svm
+
+            pred_class = model.predict(X)[0]
+            proba = model.predict_proba(X)[0]
+
+            prob_phishing = proba[list(model.classes_).index(1)]
+            prob_legit = proba[list(model.classes_).index(-1)]
+
+            if pred_class == 1:
+                prediction = "Phishing (Độc hại)"
+                probability = prob_phishing
+            else:
+                prediction = "Legitimate (An toàn)"
+                probability = prob_legit
 
     return render_template(
         "index.html",
+        selected_mode=selected_mode,
         url_input=url_input,
         prediction=prediction,
         probability=probability,
-        selected_model=selected_model
+        selected_model=selected_model,
+        manual_values=feature_values,
+        feature_names=FEATURE_ORDER
     )
 
 

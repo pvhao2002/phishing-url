@@ -10,6 +10,8 @@
 
 <body>
     <div class="app-wrapper">
+
+        <!-- HEADER -->
         <header class="app-header">
             <div class="logo-circle">🛡️</div>
             <div>
@@ -20,6 +22,26 @@
 
         <main class="card">
             <form method="POST" class="url-form">
+
+                <!-- MODE SELECT -->
+                <div class="mode-select">
+                    <label>
+                        <input type="radio" name="mode" value="url" onchange="this.form.submit()" {% if
+                            selected_mode=='url' %}checked{% endif %}>
+                        <strong>Mode 1:</strong> Kiểm tra bằng URL
+                    </label>
+
+                    <label style="margin-left: 20px;">
+                        <input type="radio" name="mode" value="manual" onchange="this.form.submit()" {% if
+                            selected_mode=='manual' %}checked{% endif %}>
+                        <strong>Mode 2:</strong> Nhập thủ công 30 features
+                    </label>
+                </div>
+
+                <hr>
+
+                <!-- MODE 1: URL -->
+                {% if selected_mode == 'url' or not selected_mode %}
                 <label for="url" class="form-label">Nhập URL cần kiểm tra</label>
 
                 <div class="input-group">
@@ -27,8 +49,54 @@
                     <input type="text" id="url" name="url" placeholder="vd: example.com/login"
                         value="{{ url_input or '' }}" required>
                 </div>
+                {% endif %}
 
-                <!-- ✅ CHỌN MODEL -->
+                <!-- MODE 2: MANUAL INPUT -->
+                {% if selected_mode == 'manual' %}
+                <div class="manual-form">
+                    <h3>Nhập thủ công 30 features</h3>
+
+                    <div class="grid-3">
+
+                        <!-- LIST 30 FEATURES -->
+                        {% set fields = [
+                        'UsingIP','LongURL','ShortURL','Symbol@','Redirecting//','PrefixSuffix-',
+                        'SubDomains','HTTPS','DomainRegLen','Favicon','NonStdPort','HTTPSDomainURL',
+                        'RequestURL','AnchorURL','LinksInScriptTags','ServerFormHandler','InfoEmail',
+                        'AbnormalURL','WebsiteForwarding','StatusBarCust','DisableRightClick',
+                        'UsingPopupWindow','IframeRedirection','AgeofDomain','DNSRecording',
+                        'WebsiteTraffic','PageRank','GoogleIndex','LinksPointingToPage','StatsReport'
+                        ] %}
+
+                        {% for f in fields %}
+                        <div class="manual-input">
+                            <label>{{ f }}</label>
+
+                            {% if f in [
+                                'LongURL','SubDomains','HTTPS','AnchorURL','LinksInScriptTags',
+                                'ServerFormHandler','WebsiteTraffic','LinksPointingToPage', 'WebsiteForwarding'
+                            ] %}
+                                <!-- FIELD LOẠI 3 GIÁ TRỊ: -1, 0, 1 -->
+                                <input type="number" name="f_{{ f }}"
+                                    min="-1" max="1" step="1"
+                                    placeholder="-1 / 0 / 1"
+                                    value="{{ manual_values[f] if manual_values else '' }}" required>
+                            {% else %}
+                                <!-- FIELD LOẠI 2 GIÁ TRỊ: -1, 1 -->
+                                <input type="number" name="f_{{ f }}"
+                                    min="-1" max="1" step="2"
+                                    placeholder="-1 / 1"
+                                    value="{{ manual_values[f] if manual_values else '' }}" required>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <!-- MODEL SELECT -->
                 <div class="model-select">
                     <label>
                         <input type="radio" name="model" value="logistic" {% if selected_model=="logistic" %}checked{%
@@ -41,12 +109,18 @@
                             %}>
                         Random Forest
                     </label>
+
+                    <label style="margin-left:20px;">
+                        <input type="radio" name="model" value="svm" {% if selected_model=="svm" %}checked{% endif %}>
+                        SVM
+                    </label>
                 </div>
 
-                <button type="submit" class="btn-primary">Kiểm tra URL</button>
+                <button type="submit" class="btn-primary">Kiểm tra</button>
+
             </form>
 
-
+            <!-- RESULT -->
             {% if prediction %}
             <section class="result-section">
                 <h2>Kết quả phân tích</h2>
@@ -64,11 +138,9 @@
 
                     <div class="result-detail">
                         <p><strong>Phân loại:</strong> {{ prediction }}</p>
+
                         {% if probability is not none %}
-                        <p>
-                            <strong>Xác suất:</strong>
-                            {{ '%.2f'|format(probability * 100) }}%
-                        </p>
+                        <p><strong>Xác suất:</strong> {{ '%.2f'|format(probability * 100) }}%</p>
                         {% endif %}
                     </div>
                 </div>
@@ -76,10 +148,12 @@
             {% endif %}
         </main>
 
+        <!-- FOOTER -->
         <footer class="app-footer">
-            <p> 1. Huỳnh Quỳnh Đức </p> <br>
+            <p>1. Huỳnh Quỳnh Đức</p>
             <p>2. Mai Thái Đăng</p>
         </footer>
+
     </div>
 </body>
 

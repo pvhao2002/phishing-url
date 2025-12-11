@@ -224,3 +224,58 @@ body {
         justify-content: center;
     }
 }
+
+.manual-form {
+    margin-top: 20px;
+    background: #fafafa;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.manual-input {
+    display: flex;
+    flex-direction: column;
+}
+
+.manual-input label {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.manual-input input {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.manual-form {
+    background: #f7f7f7;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.manual-input label {
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+.manual-input input {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
